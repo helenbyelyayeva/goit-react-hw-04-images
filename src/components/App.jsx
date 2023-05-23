@@ -10,45 +10,50 @@ import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
 export const App = () => {
-  const [search, setSearch] = useState('');
+  const [searchQuery, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [items, setItems] = useState([]);
   const [error, setError] = useState('null');
-  // const [per_page, setPerPage] = useState('');
   const [largeImageUrl, setLargeImageUrl] = useState('');
   const [isButtonVisible, setVisibility] = useState('');
   const [loading, setLoading] = useState('');
+  const per_page = 12;
 
   useEffect(() => {
-    const getImages = async () => {
+    getImages(searchQuery, page);
+  }, [searchQuery, page]);
 
-      setLoading('true');
-      setVisibility('false');
-      if (!search) {
+  const getImages = async (search, page) => {
+    if (!search) {
+      return;
+    } setLoading('true');
+    try {
+      const { hits, totalHits } = await fetchImages(search, page);
+      if (search.length === 0 || totalHits === 0) {
+        toast.error('Nothing was found :(');
+        setVisibility('');
         return;
-      } try {
-        const { hits, totalHits } = await fetchImages(search, page);
-        if (search.length === 0 || totalHits === 0) {
-          toast.error('Nothing was found :(');
-          return;
-        } else if (page === 1) {
-          toast.success(`${totalHits} images were found`);
-        }
-        setItems(prevItems => [...prevItems, ...hits]);
-        setVisibility(page < Math.ceil(totalHits /12));
-      } catch (error) {
-        setError(error.message);
+      } else if (page === 1) {
+        toast.success(`${totalHits} images were found`);
       }
-      finally {
-        setLoading('false');
-      }
+      setItems(prevItems => [...prevItems, ...hits]);
+      setVisibility('true' && page < Math.ceil(totalHits / per_page));
+    } catch (error) {
+      setError(error.message);
     }
-    if (search) {
-      getImages();
+    finally {
+      setLoading('false');
     }
-  }, [search, page]);
+  }
+
 
   const handleFormSubmit = ({ query }) => {
+    if (query.trim() === '') {
+      toast.error('Please enter some data');
+      setItems([]);
+      setVisibility('');
+      return;
+    }
     setSearch(query);
     setPage(1);
     setItems([]);

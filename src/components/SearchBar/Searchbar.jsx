@@ -2,8 +2,7 @@ import propTypes from 'prop-types';
 import { useState } from 'react';
 import css from "./Searchbar.module.css";
 import { FaSearch } from 'react-icons/fa';
-import { toast, ToastContainer } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
+
 
 
 export const Searchbar = ({ onSubmit }) => {
@@ -11,10 +10,6 @@ export const Searchbar = ({ onSubmit }) => {
 
     const handleSubmit = e => {
         e.preventDefault();
-        if (query.trim() === '') {
-            toast.error('Please enter some data');
-            return;
-        }
         onSubmit({ query });
         setQuery('');
     };
@@ -36,7 +31,6 @@ export const Searchbar = ({ onSubmit }) => {
                     placeholder="Search images and photo..."
                 />
             </form>
-            <ToastContainer autoClose={2000} />
         </header>
     );
 
